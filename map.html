@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <!-- All this is very ugly. I'm aware of it; this is just a very first draft to share. -->
+
+  <head>
+    <meta charset="utf-8" />
+    <title>43rd Dems Areas</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css"
+          integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ=="
+          crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"
+            integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log=="
+            crossorigin=""></script>
+  </head>
+  <body>
+    -- Before --
+    <div id="mapid" style="width: 1500px; height: 900px;"></div>
+    -- After --
+    <script type="text/javascript">
+      // <![CDATA[ 
+function rainbow(numOfSteps, step) {
+    // This function generates vibrant, "evenly spaced" colours (i.e. no clustering). This is ideal for creating easily distinguishable vibrant markers in Google Maps and other apps.
+    // Adam Cole, 2011-Sept-14
+    // HSV to RBG adapted from: http://mjijackson.com/2008/02/rgb-to-hsl-and-rgb-to-hsv-color-model-conversion-algorithms-in-javascript
+    var r, g, b;
+    var h = step / numOfSteps;
+    var i = ~~(h * 6);
+    var f = h * 6 - i;
+    var q = 1 - f;
+    switch(i % 6){
+        case 0: r = 1; g = f; b = 0; break;
+        case 1: r = q; g = 1; b = 0; break;
+        case 2: r = 0; g = 1; b = f; break;
+        case 3: r = 0; g = q; b = 1; break;
+        case 4: r = f; g = 0; b = 1; break;
+        case 5: r = 1; g = 0; b = q; break;
+    }
+    var c = "#" + ("00" + (~ ~(r * 255)).toString(16)).slice(-2) + ("00" + (~ ~(g * 255)).toString(16)).slice(-2) + ("00" + (~ ~(b * 255)).toString(16)).slice(-2);
+    return (c);
+}
+/**
+ * Returns a random number between min (inclusive) and max (exclusive)
+ */
+function getRandomArbitrary(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
+      var map = L.map('mapid').setView([47.62103084247245,-122.22801247109702], 12);
+      L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png', {
+          maxZoom: 18, 
+          attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, ' +
+              '&copy; <a href="https://carto.com/attribution">CARTO</a>'
+      }).addTo(map);
+      var n = getRandomArbitrary(0,10);
+      let xhr = new XMLHttpRequest();
+      xhr.open('GET', 'thing.geojson');
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.onload = function() {
+          if (xhr.status === 200) {
+              var tooltips=[];
+              new L.geoJson(JSON.parse(xhr.responseText), {
+                  style: function(feature) {
+                      n += getRandomArbitrary(0,10);
+                      return {
+                          fillColor: rainbow(10, n),
+                          fillOpacity: 0.6,
+                          stroke: true,
+                          weight: 1,
+                          color: 'black',
+                      };
+                  },
+                  onEachFeature: function(feature, layer) {
+                      tooltips.push([layer, feature.properties.name]);
+                  }
+              }).addTo(map);
+              tooltips.forEach(function (x){
+                  x[0].bindTooltip(x[1], {sticky:true, direction:'center'});
+              });
+          }
+      };
+      xhr.send();
+      // ]]>
+    </script>
+  </body>
+</html>
