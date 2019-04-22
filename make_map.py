@@ -8,7 +8,7 @@ class Maker:
 
         self.areas = {}
         for row in csv.reader(open(areas_filename)):
-            self.areas.setdefault(row[0], []).append(row[1])
+            self.areas.setdefault(row[1], []).append(row[0])
 
     def make_feature(self, area):
         feat = [x for x in self.d.features if x.properties['votdst'] in self.areas[area]]
@@ -24,5 +24,5 @@ class Maker:
 
 if __name__ == '__main__':
     m = Maker("/home/jesse/FreeProjects/precinctHelper/precincts.geojson",
-              '/home/jesse/Downloads/PrecinctToArea.csv')
+              'emptyPrecinctsByArea.csv')
     m.write('/home/jesse/FreeProjects/precinctHelper/thing.geojson')
